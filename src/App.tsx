@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { List } from './pages/List';
+import { usePlanets } from './hooks/usePlanets'
+import { Search } from '@mui/icons-material';
+import { Box, Button, Input } from '@mui/material';
+export const App: React.FC = () => {
+  const { planets, isLoading, hasErrored, fetchPlanets, handleSearch, handleSetPage, page, setSearch, setPage, search} = usePlanets()
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  useEffect(() => {
+    fetchPlanets(1, "")
+  }, [fetchPlanets])
+
+  const handleOnChange = (event) => {
+    console.log('event', event)
+    console.log('event.target.value', event.target.value)
+    setSearch(event.target.value)
+  }
+  const handlePageChange = async (page: number) => {
+    handleSetPage(page)
+  }
+
+  if(!planets) {
+    return <p>No data ...</p>
+  }
+
+  if(isLoading) {
+    return <p>Fetching data ... </p>
+  }
+
+  if(hasErrored) {
+    return <p>Something has gone wrong ... </p>
+  }
+return (
+  <div>
+    <Box margin={2} padding={5} sx={{backgroundColor: 'white'}}>
+        <Input fullWidth value={search} onChange={handleOnChange}/>
+        <Button onClick={() => handleSearch(search)}>Search</Button>
+    </Box>
+    <List page={page} planets={planets.results} count={Math.ceil(planets.count / 10)} onPageChange={handlePageChange}/>
+  </div>
+)
 }
-
-export default App;
